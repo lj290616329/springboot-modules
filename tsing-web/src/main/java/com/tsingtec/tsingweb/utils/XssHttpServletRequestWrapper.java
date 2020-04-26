@@ -1,12 +1,14 @@
 package com.tsingtec.tsingweb.utils;
 
-import com.alibaba.fastjson.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Document.OutputSettings;
 import org.jsoup.safety.Whitelist;
+import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.boot.configurationprocessor.json.JSONTokener;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
+
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -72,12 +74,12 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
             String requestBodyStr = getRequestPostStr(request);
             if (!StringUtils.isEmpty(requestBodyStr)) {
                 requestBodyStr = filter(requestBodyStr);
-                JSONObject resultJson = JSONObject.parseObject(requestBodyStr);
-                requestBody = resultJson.toString().getBytes(charSet);
+                Object json = new JSONTokener(requestBodyStr).nextValue();
+                requestBody = json.toString().getBytes(charSet);
             } else {
                 requestBody = new byte[0];
             }
-        } catch (IOException e) {
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
     }

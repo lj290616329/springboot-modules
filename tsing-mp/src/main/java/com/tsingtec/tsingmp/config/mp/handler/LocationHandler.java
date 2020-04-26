@@ -1,6 +1,6 @@
 package com.tsingtec.tsingmp.config.mp.handler;
 
-import com.tsingtec.mini.config.mp.builder.TextBuilder;
+import com.tsingtec.tsingmp.config.mp.builder.TextBuilder;
 import me.chanjar.weixin.common.api.WxConsts.XmlMsgType;
 import me.chanjar.weixin.common.session.WxSessionManager;
 import me.chanjar.weixin.mp.api.WxMpService;
