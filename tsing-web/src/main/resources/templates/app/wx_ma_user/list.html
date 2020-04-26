@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:include="layout/header">
+</head>
+<body>
+<div class="layui-fluid">
+    <div class="dept-table">
+        <div id="searchParam">
+            <div class="layui-form-item">
+                <div class="layui-input-inline">
+                    <input type="text" id="name" class="layui-input"  autocomplete="off" placeholder="请输入姓名">
+                </div>
+                <div class="layui-input-inline">
+                    <input type="text" id="phone" class="layui-input"  autocomplete="off" placeholder="请输入手机号码">
+                </div>
+                <div class="layui-input-inline">
+                    <input type="text" id="nickName" class="layui-input"  autocomplete="off" placeholder="请输用户昵称">
+                </div>
+
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" id="createTime" autocomplete="off" placeholder="创建时间">
+                </div>
+                <div class="layui-input-inline layui-form">
+                    <select  id="gender"  >
+                        <option value="">请选择性别</option>
+                        <option value="1">男</option>
+                        <option value="2">女</option>
+                    </select>
+                </div>
+                <div class="layui-input-inline ">
+                    <button class="layui-btn" id="search">查询</button>
+                </div>
+            </div>
+        </div>
+        <table class="layui-table" id="userTable" lay-filter="userTable" ></table>
+        <div id="laypage" class="layui-laypage-btn"></div>
+    </div>
+    <div  id="templateData" style="display: none">
+        <div class="layui-fluid">
+            <form class="layui-form" action="">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">单行输入框</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="title" lay-verify="title" autocomplete="off" placeholder="请输入标题" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">验证必填项</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="username" lay-verify="required" lay-reqtext="用户名是必填项，岂能为空？" placeholder="请输入" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">验证必填项</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="username" lay-verify="required" lay-reqtext="用户名是必填项，岂能为空？" placeholder="请输入" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">验证必填项</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="username" lay-verify="required" lay-reqtext="用户名是必填项，岂能为空？" placeholder="请输入" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">验证必填项2</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="username" lay-verify="required" lay-reqtext="用户名是必填项，岂能为空？" placeholder="请输入" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script type="text/html" id="tool">
+    <a class="layui-btn layui-btn-xs" lay-event="sendTemplate">发送通知</a>
+</script>
+
+<script type="text/html" id="imgTpl">
+        <img class="head" src="{{d.avatarUrl}}"  style="width:30px; height:30px;">
+</script>
+<script  th:inline="none">
+    layui.use(['table','laypage', 'layer','laydate'], function(){
+        var table = layui.table;
+        var laypage = layui.laypage;
+        var layer = layui.layer;
+        var $ = layui.jquery;
+        var laydate = layui.laydate;
+        var searchParam = {
+            gender:null,
+            name:null,
+            nickName:null,
+            phone:null,
+            pageNum:1,
+            pageSize:10
+        };
+        /**
+         * 获取table数据
+         */
+        var getTableData = function(){
+            var roleSaveLoading = layer.msg('数据提交中，请稍候',{icon: 16,time:false,shade:0.8});
+            $.ajax({
+                url:"/manager/wx_user",
+                type:"get",
+                data:searchParam,
+                dataType:"json",
+                success:function (res) {
+                    console.log(res);
+                    if(res.code == 200){
+                        laypageTable(res.data.totalRows,searchParam.pageNum);
+                        loadTable(res.data.list);
+                    }else if(res.code == 400){
+                        location.href = "/index/403"
+                    }else if(res.code == -1){
+                        layer.msg("凭证过期请重新登录")
+                        top.location = "/index/login"
+                    }else if(res.code == 500){
+                        layer.msg(res.msg);
+                        location.href = "/index/404"
+                    }else{
+                        layer.msg(res.msg);
+                        location.href = "/index/404"
+                    }
+                },
+                error:function (XMLHttpRequest, textStatus, errorThrown) {
+                    layer.close(roleSaveLoading);
+                    if(XMLHttpRequest.status==404){
+                        top.window.location.href="/index/404";
+                    }else{
+                        layer.msg("服务器好像除了点问题！请稍后试试");
+                    }
+                },
+                complete:function () {
+                    layer.close(roleSaveLoading);
+                }
+            })
+        };
+        /**
+         *获取一次数据
+        */
+        getTableData();
+        //渲染table
+        var loadTable = function (data) {
+            table.render({
+                elem: '#userTable'
+                ,cols: [
+                    [
+                        {type: 'numbers',title: '序号'},
+                        {field: 'avatarUrl', title: '头像', templet: '#imgTpl'},
+                        {field: 'name', title: '姓名'},
+                        {field: 'phone', title: '手机号',hide:true},
+                        {field: 'nickName', title: '昵称',},
+                        {field: 'createTime', title: '创建时间'},
+                        {title:'操作',toolbar:'#tool'}
+                    ]
+                ]
+                ,data: data
+                ,even: true
+                ,limit: data.length
+                ,limits: [10, 20, 30, 40, 50]
+                ,toolbar:true
+            });
+        };
+        /**
+         * 渲染分页工具
+         */
+        var laypageTable = function(count,currentPage) {
+            laypage.render({
+                elem: 'laypage'
+                ,count: count
+                ,limit:searchParam.pageSize
+                ,layout: ['count', 'prev', 'page', 'next', 'limit', 'skip']
+                ,curr: location.hash.replace('#!currentPage=', '') //获取起始页
+                ,hash: 'currentPage' //自定义hash值
+                ,jump: function (obj,first) {
+                    if (!first){
+                        searchParam.pageNum=obj.curr;
+                        searchParam.pageSize=obj.limit;
+                        getTableData();
+                    }
+                }
+            });
+        };
+        /**
+         * 时间选择
+         */
+        laydate.render({
+            elem: '#createTime'
+            ,type: 'datetime'
+            ,range: '~'
+            ,done: function(value, date, endDate){
+                if(value !=null && value != undefined && value != ""){
+                    searchParam.startTime=value.split("~")[0];
+                    searchParam.endTime=value.split("~")[1];
+                }else {
+                    searchParam.startTime=null;
+                    searchParam.endTime=null;
+                }
+            }
+        });
+        /**
+         * 搜索按钮
+         */
+        $("#search").click(function () {
+            searchParam.gender=$("#gender").val();
+            searchParam.name=$("#name").val();
+            searchParam.nickName=$("#nickName").val();
+            searchParam.phone=$("#phone").val();
+            searchParam.pageNum=1;
+            getTableData();
+        });
+        /**
+         * toolbar工具条
+         */
+        table.on('tool(userTable)', function(obj){
+            switch(obj.event){
+                case 'sendTemplate':
+                    layer.open({
+                        type: 1,
+                        offset: '50px',
+                        skin: 'layui-layer-molv',
+                        title: "发送模板通知",
+                        area: ['500px', '400px'],
+                        shade: 0.3,
+                        shadeClose: false,
+                        content: $("#templateData"),
+                        btn: ['确定', '取消'],
+                        yes: function (index) {
+                            console.log(index);
+                            layer.close(index);
+                        }
+                    });
+                    break;
+            };
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="tsing-mini" />
+        <module name="tsing-core" />
+        <module name="tsing-web" />
+        <module name="tsing-mp" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="tsingtec-core" target="1.5" />
+      <module name="tsingtec-mini" target="1.5" />
+      <module name="tsingtec-web" target="1.5" />
+      <module name="tsingtec-wechat" target="1.5" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="tsing-core" options="-parameters" />
+      <module name="tsing-mini" options="-parameters" />
+      <module name="tsing-mp" options="-parameters" />
+      <module name="tsing-web" options="-parameters" />
+    </option>
+  </component>
+</project>

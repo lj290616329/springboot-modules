@@ -1,0 +1,32 @@
+{
+  "groups": [
+    {
+      "name": "qiniu",
+      "type": "com.tsingtec.tsingweb.config.qiniu.ConstantQiniu",
+      "sourceType": "com.tsingtec.tsingweb.config.qiniu.ConstantQiniu"
+    }
+  ],
+  "properties": [
+    {
+      "name": "qiniu.access-key",
+      "type": "java.lang.String",
+      "sourceType": "com.tsingtec.tsingweb.config.qiniu.ConstantQiniu"
+    },
+    {
+      "name": "qiniu.bucket",
+      "type": "java.lang.String",
+      "sourceType": "com.tsingtec.tsingweb.config.qiniu.ConstantQiniu"
+    },
+    {
+      "name": "qiniu.path",
+      "type": "java.lang.String",
+      "sourceType": "com.tsingtec.tsingweb.config.qiniu.ConstantQiniu"
+    },
+    {
+      "name": "qiniu.secret-key",
+      "type": "java.lang.String",
+      "sourceType": "com.tsingtec.tsingweb.config.qiniu.ConstantQiniu"
+    }
+  ],
+  "hints": []
+}

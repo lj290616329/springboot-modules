@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/layuiadmin/layui/css/layui.css">
+    <link rel="stylesheet" href="/layuiadmin/style/admin.css">
+</head>
+<body>
+<div class="layui-fluid">
+    <div class="panel panel-default operation_user" hidden>
+        <div class="panel-heading title"></div>
+        <div class="layui-card-body">
+            <form class="layui-form "  autocomplete="off" action="" lay-filter="deptInfo" style="width: 700px;margin-top: 10px">
+                <input name="id" hidden/>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">账号名称</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="name" placeholder="账号名称" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">登录名称</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="loginName" placeholder="登录名称" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-form-label ">密码</div>
+                    <div class="layui-input-block">
+                        <input type="password" name="password" placeholder="请输入密码" autocomplete="off" class="layui-input" >
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">状态</label>
+                    <div class="layui-input-block">
+                        <input type="checkbox" name="status" lay-skin="switch" lay-filter="switch" lay-text="启用|禁用" checked>
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="submit">保存</button>
+                        <button  class="layui-btn layui-btn-primary" id="btn_cancel">返回</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="user_table_div">
+        <div id="searchParam">
+            <div class="layui-form-item">
+                <div class="layui-input-inline">
+                    <input type="text" id="name" class="layui-input"  autocomplete="off" placeholder="请输入账号">
+                </div>
+                <div class="layui-input-inline">
+                    <input type="text" id="loginname" class="layui-input"  autocomplete="off" placeholder="请输用户昵称">
+                </div>
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" id="createTime" autocomplete="off" placeholder="创建时间">
+                </div>
+                <div class="layui-input-inline layui-form">
+                    <select  id="status"  >
+                        <option value="">请选择账号状态</option>
+                        <option value="0">正常</option>
+                        <option value="-1">禁用</option>
+                    </select>
+                </div>
+                <div class="layui-input-inline ">
+                    <button class="layui-btn"   id="search">查询</button>
+                </div>
+            </div>
+        </div>
+        <table class="layui-hide" id="user_table" lay-filter="user_table"></table>
+        <div id="laypage" class="layui-box layui-laypage layui-laypage-default"></div>
+    </div>
+    <div id="deptTree" style="display: none"></div>
+    <div id="roles" class="demo-transfer" style="display: none"></div>
+</div>
+
+</body>
+<script type="text/html" id="toolbar">
+    <div class="layui-btn-group">
+        <button type="button" class="layui-btn" lay-event="addNewUser">
+            <i class="layui-icon layui-icon-addition"></i> 新增用户
+        </button>
+    </div>
+    <div class="layui-btn-group">
+        <button type="button" class="layui-btn" lay-event="batchDeleted">
+            <i class="layui-icon layui-icon-delete"></i> 批量删除
+        </button>
+    </div>
+</script>
+<script type="text/html" id="tool">
+    <a class="layui-btn  layui-btn-xs" lay-event="operationRole">赋予角色</a>
+    <a class="layui-btn layui-btn-xs" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+
+</script>
+<script src="/layuiadmin/layui/layui.js"></script>
+</html>
+<script>
+    layui.config({
+        base: '/layuiadmin/'//静态资源所在路径
+    }).extend({
+        CoreUtil : 'core-util/CoreUtil'
+    }).use(['table','laypage', 'layer','laydate','tree','transfer','CoreUtil'], function(){
+        var table = layui.table;
+        var laypage = layui.laypage;
+        var form = layui.form;
+        var layer = layui.layer;
+        var $ = jQuery = layui.jquery;
+        var laydate = layui.laydate;
+        var transfer=layui.transfer;
+        var CoreUtil = layui.CoreUtil;
+        var searchParam= {
+            name:null,
+            loginname:null,
+            status:null,
+            startTime:null,
+            endTime:null,
+            pageNum:1,
+            pageSize:10
+        };
+        /**
+         * 翻页
+         * @param count
+         */
+        var laypageTable = function(count) {
+            laypage.render({
+                elem: 'laypage'
+                ,count: count
+                ,limit:searchParam.pageSize
+                , layout: ['count', 'prev', 'page', 'next', 'limit', 'skip']
+                ,curr: location.hash.replace('#!currentPage=', '') //获取起始页
+                ,hash: 'currentPage' //自定义hash值
+                , jump: function (obj,first) {
+                    if (!first){
+                        searchParam.pageNum=obj.curr;
+                        searchParam.pageSize=obj.limit;
+                        getTableData(false);
+                    }
+                }
+            });
+        };
+        //渲染table
+        var loadTable=function (data) {
+            table.render({
+                elem: '#user_table'
+                ,cols: [
+                    [
+                        {type: 'checkbox', fixed: 'left'},
+                        {field: 'name', title: '名称', width: 130},
+                        {field: 'loginName', title: '登录账号', width: 130},
+                        {field: 'createTime', title: '创建时间'},
+                        {field: 'updateTime', title: '更新时间'},
+                        {
+                            field: 'status', title: '状态', width: 100,templet: function (item) {
+                                if(item.status === 0){
+                                    return  '  <input type="checkbox" lay-skin="switch" lay-text="正常|禁用" checked disabled>';
+                                }
+                                if(item.status === -1){
+                                    return  '  <input type="checkbox" lay-skin="switch" lay-text="正常|禁用" disabled>';
+                                }
+                            }
+                        },
+                        {width:300,toolbar:"#tool",title:'操作'}
+                    ]
+                ]
+                ,data: data
+                ,even: true
+                ,limit: data.length
+                ,limits: [10, 20, 30, 40, 50]
+                ,toolbar:'#toolbar'
+
+            });
+        };
+        /**
+         * 分页获取账号
+         */
+        var getTableData = function(flag){
+            CoreUtil.sendAjax("/manager/admins",searchParam,function (res) {
+                loadTable(res.data.content);
+                if(res.data.list !=null){
+                    if(flag){laypageTable(res.data.totalElements);}
+                }
+            },"GET",'application/json; charset=UTF-8',false);
+        };
+        /**
+         *获取一次数据
+         */
+        getTableData(true);
+        /**
+         * 时间切换
+         */
+        laydate.render({
+            elem: '#createTime'
+            ,type: 'datetime'
+            ,range: '~'
+            ,done: function(value, date, endDate){
+                if(value !=null && value != undefined && value != ""){
+                    searchParam.startTime=value.split("~")[0];
+                    searchParam.endTime=value.split("~")[1];
+                }else {
+                    searchParam.startTime=null;
+                    searchParam.endTime=null;
+                }
+
+            }
+        });
+        /**
+         * 搜索
+         */
+        $("#search").click(function () {
+            searchParam.status=$("#status").val();
+            searchParam.name=$("#name").val();
+            searchParam.loginname=$("#loginname").val();
+            searchParam.pageNum=1;
+            getTableData(true);
+        });
+        /**
+         * 头部工具栏
+         */
+        table.on('toolbar(user_table)', function(obj){
+            var checkStatus = table.checkStatus(obj.config.id);
+            switch(obj.event){
+                case 'batchDeleted':
+                    var checkStatus = table.checkStatus(obj.config.id);
+                    var data = checkStatus.data;
+                    if(data.length==0){
+                        layer.msg("请选择要批量删除的用户");
+                    }else {
+                        var userIds = [];
+                        $(data).each(function (index,item) {
+                            userIds.push(item.id);
+                        });
+                        tipDialog(userIds,"选中的");
+                    }
+                    break;
+                case 'addNewUser':
+                    $(".title").html("新增用户");
+                    $(".user_table_div").hide();
+                    $(".operation_user").show();
+                    $(".operation_user input[name=id]").val("");
+                    $(".operation_user input[name=username]").val("");
+                    $(".operation_user input[name=password]").val("");
+                    $(".operation_user input[name=status]").attr('checked', 'checked');
+                    $(".operation_user input[name=status]").attr('type', 'hidden').val(0);
+                    form.render(); //更新全部
+                    break;
+            };
+        });
+        /**
+         * table 列工具栏
+         */
+        table.on('tool(user_table)',function (obj) {
+            var data = obj.data;
+            switch (obj.event) {
+                case 'del':
+                    var userIds=[];
+                    userIds.push(data.id);
+                    tipDialog(userIds,data.name);
+                    break;
+                case 'edit':
+                    console.log(data);
+                    $(".user_table_div").hide();
+                    $(".operation_user").show();
+                    $(".title").html("编辑用户");
+                    $(".operation_user input[name=id]").val(data.id);
+                    $(".operation_user input[name=name]").val(data.name);
+                    $(".operation_user input[name=loginName]").val(data.loginName);
+                    $(".operation_user input[name=password]").val("");
+                    if(data.status ==0){
+                        $(".operation_user input[name=status]").attr('checked', 'checked');
+                        $(".operation_user input[name=status]").attr('type', 'hidden').val(0);
+                        var x = document.getElementsByClassName("layui-unselect layui-form-switch");
+                        x[0].setAttribute("class", "layui-unselect layui-form-switch layui-form-onswitch");
+                        var d = document.getElementsByTagName('em')[0];
+                        d.firstChild.nodeValue = '启用';
+                    }else {
+                        $(".operation_user input[name=status]").attr('type', 'hidden').removeAttr("checked").val(-1);
+                        var x = document.getElementsByClassName("layui-unselect layui-form-switch");
+                        x[0].setAttribute("class", "layui-unselect layui-form-switch");
+                        var d = document.getElementsByTagName('em')[0];
+                        d.firstChild.nodeValue = '禁用';
+                    }
+                    form.render(); //更新全部
+
+                    break;
+                case 'operationRole':
+                    CoreUtil.sendAjax("/manager/admin/roles/"+data.id,null,function (res) {
+                        initTransfer(res.data);
+                        layer.open({
+                            type: 1,
+                            offset: '50px',
+                            skin: 'layui-layer-molv',
+                            title: "赋予角色",
+                            area: ['500px', '400px'],
+                            shade: 0,
+                            shadeClose: false,
+                            content: jQuery("#roles"),
+                            btn: ['确定', '取消'],
+                            yes: function (index) {
+                                //获得右侧数据
+                                var roleIds = [];
+                                var getData = transfer.getData('ownData');
+                                $(getData).each(function (index,item) {
+                                    roleIds.push(item.value);
+                                });
+                                CoreUtil.sendAjax("/manager/admin/roles/"+data.id,JSON.stringify(roleIds),function (res) {
+                                    layer.msg(res.msg);
+                                    getTableData();
+                                },"PUT",'application/json; charset=UTF-8',false);
+                                layer.close(index);
+                            }
+                        });
+                    },"GET",'application/json; charset=UTF-8',false);
+
+                    break;
+            }
+        });
+        $("#btn_cancel").click(function() {
+            $(".user_table_div").show();
+            $(".operation_user").hide();
+            return false;
+        });
+        var tipDialog=function (userIds,username) {
+            layer.open({
+                content: '确定要删除['+username+"]用户么?",
+                yes: function(index, layero){
+                    layer.close(index); //如果设定了yes回调，需进行手工关闭
+                    CoreUtil.sendAjax("/manager/admin",JSON.stringify(userIds),function (res) {
+                        layer.msg(res.msg);
+                    },"DELETE",'application/json; charset=UTF-8',false);
+                }
+            });
+        };
+        form.on('switch(switch)', function(){
+            $(".operation_user input[name=status]").attr('type', 'hidden').val(this.checked ? 0 : -1);
+        });
+        form.on('submit(submit)', function(data){
+            console.log(data);
+            if(data.field.id===undefined || data.field.id===null || data.field.id===""){
+                CoreUtil.sendAjax("/manager/admin",JSON.stringify(data.field),function (res) {
+                    $(".user_table_div").show();
+                    $(".operation_user").hide();
+                    getTableData();
+                },"POST",'application/json; charset=UTF-8',false);
+            }else {
+                CoreUtil.sendAjax("/manager/admin",JSON.stringify(data.field),function (res) {
+                    $(".user_table_div").show();
+                    $(".operation_user").hide();
+                    getTableData();
+                },"PUT",'application/json; charset=UTF-8',false);
+            }
+            return false;
+        });
+        var initTransfer=function (data) {
+            transfer.render({
+                elem: '#roles'
+                ,data: data.allRole
+                ,title: ['赋予角色', '拥有角色']
+                ,showSearch: true
+                ,value:data.ownRoles
+                ,id: 'ownData'
+                ,parseData: function(res){
+                    return {
+                        "value": res.id //数据值
+                        ,"title": res.name //数据标题
+                    }
+                }
+            })
+        }
+    });
+</script>

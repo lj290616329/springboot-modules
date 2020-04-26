@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理系统</title>
+    <link rel="stylesheet" href="/layuiadmin/layui/css/layui.css">
+    <link rel="stylesheet" href="/layuiadmin/style/login.css">
+    <link rel="stylesheet" href="/layuiadmin/style/admin.css">
+</head>
+<body>
+
+<div class="layadmin-user-login layadmin-user-display-show" id="LAY-user-login" style="display: none;">
+
+    <div class="layadmin-user-login-main">
+        <div class="layadmin-user-login-box layadmin-user-login-header">
+            <h2>系统登录</h2>
+            <p>Grid系统登录</p>
+        </div>
+        <div class="layadmin-user-login-box layadmin-user-login-body layui-form">
+            <div class="layui-form-item">
+                <label class="layadmin-user-login-icon layui-icon layui-icon-username" for="LAY-user-login-username"></label>
+                <input type="text" name="username" id="LAY-user-login-username" lay-verify="required" placeholder="用户名" class="layui-input" autocomplete="off">
+            </div>
+            <div class="layui-form-item">
+                <label class="layadmin-user-login-icon layui-icon layui-icon-password" for="LAY-user-login-password"></label>
+                <input type="password" name="password" id="LAY-user-login-password" lay-verify="required" placeholder="密码" class="layui-input" autocomplete="off">
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-row">
+                    <div class="layui-col-xs7">
+                        <label class="layadmin-user-login-icon layui-icon layui-icon-vercode" for="LAY-user-login-vercode"></label>
+                        <input type="text" name="vercode" id="LAY-user-login-vercode" lay-verify="required" placeholder="图形验证码" class="layui-input" autocomplete="off">
+                    </div>
+                    <div class="layui-col-xs5">
+                        <div style="margin-left: 10px;">
+                            <img id="vercodeImg" title="点击刷新验证码" alt="验证码" onclick = "this.src='/index/kaptcha?d='+new Date()*1" src="/index/kaptcha?d=1" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <button class="layui-btn layui-btn-fluid" lay-submit lay-filter="LAY-user-login-submit">登 入</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-trans layadmin-user-login-footer">
+        <p>深圳前海清科信息科技有限公司</p>
+    </div>
+</div>
+    <script src="/layuiadmin/layui/layui.js"></script>
+<script>
+    layui.config({
+        base: '/layuiadmin/' //静态资源所在路径
+    }).extend({
+        index: 'lib/index' //主入口模块
+    }).use(['index', 'user'], function(){
+        var $ = layui.$
+            ,form = layui.form;
+        form.render();
+        //提交
+        form.on('submit(LAY-user-login-submit)', function(obj){
+            $.ajax({
+                url:'/index/login',
+                type:"post",
+                data:JSON.stringify( obj.field),
+                dataType:"json",
+                contentType: "application/json", //必须有
+                success:function(res){
+                    console.log(res);
+                    if(res.code==200){
+                        top.window.location.href="/home/index";
+                    }else{
+                        $("#vercodeImg").click();
+                        layer.msg(res.msg);
+                    }
+                }
+            })
+        });
+
+
+        var websocket = null;
+
+        function getWebSocket(){
+            var url = window.location.origin.replace("http:","ws:");
+            console.log(window.location);
+            //判断当前浏览器是否支持WebSocket
+            if('WebSocket' in window){
+                websocket = new WebSocket(url+"/websocket/[[${token}]]");
+            }else{
+                console.log('Not support websocket');
+            }
+            //连接发生错误的回调方法
+            websocket.onerror = function(){
+                $(".wrp_code").empty().append("二维码生成失败,请使用账号密码进行登录")
+                console.log("error");
+            };
+            //连接成功建立的回调方法
+            websocket.onopen = function(event){
+                console.log("open");
+            }
+
+            //接收到消息的回调方法
+            websocket.onmessage = function(event){
+                console.log(event)
+
+            }
+            //连接关闭的回调方法
+            websocket.onclose = function(){
+                console.log("close");
+            }
+        };
+        getWebSocket();
+        //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+        window.onbeforeunload = function(){
+            if(websocket!=null && websocket.readyState==WebSocket.OPEN){
+                websocket.close();
+            }
+        }
+
+
+    });
+</script>
+</body>
+</html>

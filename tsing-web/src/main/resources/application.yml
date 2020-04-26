@@ -1,0 +1,81 @@
+server:
+  port: 80
+
+file-path: E:\\pics\\spring_boot\\
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:12345/spring-mini?useSSL=false&characterEncoding=utf-8
+    username: ENC(qxkgqjXH/jeft8KzO3EywA==)
+    password: ENC(IrMnoCs9L9jxtYCvckf5Rg==)
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate.dialect: com.tsingtec.tsingcore.utils.MySQLDialectUTF8
+      hibernate.format_sql: false
+      hibernate:
+        enable_lazy_load_no_trans: true
+    open-in-view: true
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: utf-8
+    servlet:
+      content-type: text/html
+    cache: false
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+  resources:
+    static-locations: file:///${file-path},classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/
+qiniu:
+  accessKey: 91Wg1ATQdNrU3z4kX3YQ0M859ijYX6WjXXnq1G1t
+  secretKey: dhCyPv2OujzF15fNqxzTISsdzClkfxVcSJnsm6OR
+  bucket: fuhai
+  path: http://gridpic.tsing-tec.com
+
+swagger2:
+  enable: true
+
+wx:
+  miniapp:
+    configs:
+      - appId: appid
+        secret: secret
+        token: token
+        aesKey: LqKwCf1MfwMvPOLlt5GYFn7lDCV2Jw4wIpQLqwboVay
+        msgDataFormat: JSON
+  mp:
+    configs:
+      - appId: appid
+        secret: secret
+        token: token
+        aesKey: LqKwCf1MfwMvPOLlt5GYFn7lDCV2Jw4wIpQLqwboVay
+
+tsingcloud:
+  weixin:
+    domain: http://17240k68p1.51mypc.cn
+
+jwt:
+  token:
+    #  token过期时间，单位分钟
+    tokenExpireTime: 30
+    secretKey: minitoken
+xss:
+  # 过滤开关
+  enabled: true
+  # 排除链接（多个用逗号分隔）
+  excludes: /home/*,/index/*
+  # 匹配链接
+  urlPatterns: /manager/*

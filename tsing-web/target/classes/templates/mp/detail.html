@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>问卷调查</title>
+<meta
+	content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=yes"
+	name="viewport">
+<meta content="no-cache" http-equiv="pragma">
+<meta content="0" http-equiv="expires">
+<meta content="telephone=no, address=no" name="format-detection">
+<meta name="author" content="Tsing">
+<link href="https://cdn.bootcss.com/weui/2.1.3/style/weui.min.css"
+	rel="stylesheet">
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/layer/3.0.3/mobile/layer.js"></script>
+</head>
+<style>
+.hide {
+	display: none;
+}
+
+.weui-input {
+	padding-left: 20px;
+}
+.weui-cells:before{
+	border-top:none;	
+}
+.weui-cells__title{
+	font-size: 16px;
+	color:#000;
+}
+@keyframes fadeOut{
+	0%{
+		border:2px solid red;
+	}
+	20%{
+		border:none;
+	}
+	40%{
+		border:2px solid red;
+	}
+	60%{
+		border:none;
+	}
+	80%{
+		border:2px solid red;
+	}
+	100%{
+		border:none;
+	}
+}
+@-webkit-keyframes fadeOut2{
+	0%{
+		border:1px solid red;
+	}
+	20%{
+		border:none;
+	}
+	40%{
+		border:1px solid red;
+	}
+	60%{
+		border:none;
+	}
+	80%{
+		border:1px solid red;
+	}
+	100%{
+		border:none;
+	}
+}
+.tools{
+	animation:fadeOut 1s linear;
+	border:1px solid red;
+}
+</style>
+<body>
+	<div class="page form_page js_show">
+
+		<div class="weui-form">
+			<div class="weui-form__text-area">
+				<h2 class="weui-form__title">输入框状态</h2>
+				<div class="weui-form__desc">可体验表单输入样式，当输入位数不等于16位的时候点击按钮可看到报错样式。</div>
+			</div>
+			<div class="weui-form__control-area">
+				<div class="weui-cells__group weui-cells__group_form">
+					<div class="weui-cells__title">表单报错</div>
+					<div class="weui-cells weui-cells_form">
+						<div class="weui-cell weui-cell_active" id="js_cell">
+							<div class="weui-cell__hd"><label class="weui-label">卡号</label></div>
+							<div class="weui-cell__bd weui-flex">
+								<input id="js_input" class="weui-input" autofocus="" type="text" pattern="[0-9]*" placeholder="请输入16位数卡号" maxlength="16">
+								<button id="js_input_clear" class="weui-btn_reset weui-btn_icon weui-btn_input-clear">
+									<i class="weui-icon-clear"></i>
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="weui-cells__group weui-cells__group_form">
+					<div class="weui-cells__title">表单只读、置灰</div>
+					<div class="weui-cells weui-cells_form">
+						<div class="weui-cell weui-cell_active weui-cell_readonly">
+							<div class="weui-cell__hd"><label class="weui-label">EMail</label></div>
+							<div class="weui-cell__bd">
+								<input class="weui-input" placeholder="请输入EMail" value="1234567" readonly="">
+							</div>
+						</div>
+						<div class="weui-cell weui-cell_active weui-cell_disabled">
+							<div class="weui-cell__hd"><label class="weui-label">微信号</label></div>
+							<div class="weui-cell__bd">
+								<input class="weui-input" placeholder="请输入微信号" value="WeUI" disabled="">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="weui-form__opr-area">
+				<a class="weui-btn weui-btn_primary weui-btn_disabled" href="javascript:" id="showTooltips">确定</a>
+			</div>
+		</div>
+
+
+	</div>
+</body>
+<script>
+$.ajax({
+	url:"/mobile/user/1",
+	type:"get",
+	dataType:"json",
+	success:function(res){
+		console.log(res);
+		alert(JSON.stringify(res))
+	}
+})
+</script>
+</html>
