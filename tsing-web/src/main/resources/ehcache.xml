@@ -72,4 +72,14 @@
 		   statistics="false">
 	</cache>
 
+	<!-- limiter 多次提交进行拦截-->
+	<cache name="limiter"
+		   maxEntriesLocalHeap="2000"
+		   eternal="false"
+		   timeToIdleSeconds="5"
+		   timeToLiveSeconds="5"
+		   overflowToDisk="false"
+		   statistics="false">
+	</cache>
+
 </ehcache>
