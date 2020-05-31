@@ -15,7 +15,7 @@ import java.util.Map;
  * Filter配置
  */
 @Configuration
-public class FilterConfig {
+public class XSSFilterConfig {
     @Value("${xss.enabled}")
     private String enabled;
 
