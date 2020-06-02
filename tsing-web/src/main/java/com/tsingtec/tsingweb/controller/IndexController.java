@@ -32,9 +32,10 @@ public class IndexController {
 
     @GetMapping("/login")
     public String login(HttpServletRequest request, Model model){
-        HttpSession session = request.getSession();
-        String sessionid = session.getId();
-        model.addAttribute("token","123321a");
+        Subject subject = SecurityUtils.getSubject();
+        if(subject.isAuthenticated()){
+            return "redirect:/home/index";
+        };
         return "login";
     }
 
